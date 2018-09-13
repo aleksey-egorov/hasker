@@ -35,4 +35,4 @@ req:
 	@yum -y -q install epel-release
 	@yum -y -q install python36
 	@yum -y -q install python36-setuptools
-	@pip install --exists-action=s -r requirements.txt
+	@pip3 install --exists-action=s -r requirements.txt
