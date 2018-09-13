@@ -32,4 +32,5 @@ collectstatic:
 
 req:
 	@echo "Installing requirements"
+	@yum install python3-pip
 	@pip install --exists-action=s -r requirements.txt
