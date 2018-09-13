@@ -30,7 +30,6 @@ migrate:
 collectstatic:
 	DJANGO_SETTINGS_MODULE=$(SETTINGS) $(MANAGE) collectstatic --noinput
 
-
 req:
-	@echo "Installing requirements"
-    @pip install --exists-action=s -r requirements.txt
+\t@echo "Installing requirements"
+\t@pip install --exists-action=s -r requirements.txt
