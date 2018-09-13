@@ -33,4 +33,4 @@ collectstatic:
 
 req:
 	@echo "Installing requirements"
-@pip install --exists-action=s -r requirements.txt
+    @pip install --exists-action=s -r requirements.txt
