@@ -31,5 +31,5 @@ collectstatic:
 	DJANGO_SETTINGS_MODULE=$(SETTINGS) $(MANAGE) collectstatic --noinput
 
 req:
-\t@echo "Installing requirements"
-\t@pip install --exists-action=s -r requirements.txt
+	@echo "Installing requirements"
+	@pip install --exists-action=s -r requirements.txt
