@@ -16,9 +16,7 @@ reload:
 	touch reload
 
 test:
-	cd credio &&\
 	DJANGO_SETTINGS_MODULE=$(SETTINGS) ./manage.py test
-	#flake8 --exclude '*migrations*' apps fortytwo_test_task
 
 run:
 	DJANGO_SETTINGS_MODULE=$(SETTINGS) $(MANAGE) runserver 0.0.0.0:8880
