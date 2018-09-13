@@ -11,9 +11,11 @@ update:
 	@make migrate
 	touch reload_project
 
-reload:
-	@make collectstatic
-	touch reload
+prod:
+	@echo "Starting server ... "
+	@make req
+	@service nginx restart
+	@uwsgi --ini uwsgi.ini
 
 test:
 	DJANGO_SETTINGS_MODULE=$(SETTINGS) ./manage.py test
@@ -32,10 +34,11 @@ collectstatic:
 
 req:
 	@echo "Installing requirements"
-	@yum -y -q install nginx
-	@yum -y -q install uwsgi
-	@yum -y -q install epel-release
-	@yum -y -q install python36
-	@yum -y -q install python36-setuptools
+	@yum -qy install initscripts
+	@yum -qy install nginx
+	@yum -qy install uwsgi
+	@yum -qy install epel-release
+	@yum -qy install python36
+	@yum -qy install python36-setuptools
 	@easy_install-3.6 pip
 	@pip install --exists-action=s -r requirements.txt
