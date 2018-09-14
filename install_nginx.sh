@@ -33,6 +33,6 @@ server {
 EOF
 
 cd /etc/nginx/sites-enabled/
-ln -s /etc/nginx/sites-available/hasker hasker
+ln -fs /etc/nginx/sites-available/hasker hasker
 
 
