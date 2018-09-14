@@ -1,4 +1,5 @@
 echo "Installing nginx ... "
+
 cat > /etc/yum.repos.d/nginx.repo << EOF
 [nginx]
 name=nginx repo
