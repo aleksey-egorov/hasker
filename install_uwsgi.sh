@@ -1,3 +1,3 @@
 echo "Installing uwsgi ... "
 
-yum -q -y install uwsgi
+apt-get -q -y install uwsgi
