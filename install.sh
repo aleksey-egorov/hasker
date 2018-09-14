@@ -43,7 +43,7 @@ echo "Installing uWSGI ... "
 
 apt-get -q -y install uwsgi
 
-cat > /etc/uwsgi/apps-available/hasker << EOF
+cat > /etc/uwsgi/apps-available/hasker.ini << EOF
 [uwsgi]
 
 uid = www-data
@@ -60,7 +60,7 @@ vacuum = true
 EOF
 
 cd /etc/uwsgi/apps-enabled/
-ln -fs /etc/uwsgi/apps-available/hasker hasker
+ln -fs /etc/uwsgi/apps-available/hasker.ini hasker
 
 cat > /etc/uwsgi/uwsgi_params << EOF
 uwsgi_param  QUERY_STRING       $query_string;
