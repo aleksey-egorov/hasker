@@ -6,7 +6,7 @@ apt -q -y install nginx
 cat > /etc/nginx/sites-available/hasker << EOF
 
 upstream django {
-     server unix:///etc/uwsgi/hasker.sock;
+     server unix:///tmp/hasker.sock;
 }
 
 server {
@@ -45,7 +45,6 @@ apt-get -q -y install uwsgi
 
 cat > /etc/uwsgi/apps-available/hasker.ini << EOF
 [uwsgi]
-
 uid = www-data
 gid = www-data
 
@@ -54,7 +53,7 @@ module = hasker.wsgi:application
 
 master = true
 processes = 1
-socket = /etc/uwsgi/hasker.sock
+socket = /tmp/hasker.sock
 chmod-socket = 664
 vacuum = true
 EOF
