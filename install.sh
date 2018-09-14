@@ -6,7 +6,7 @@ apt -q -y install nginx
 cat > /etc/nginx/sites-available/hasker << EOF
 
 upstream django {
-     server unix:///etc/uwsgi/mysite.sock;
+     server unix:///etc/uwsgi/hasker.sock;
 }
 
 server {
@@ -27,20 +27,60 @@ server {
 
     location / {
         uwsgi_pass  django;
-        include     /home/work/uwsgi_params;
+        include     /etc/uwsgi/uwsgi_params;
     }
 }
-
 EOF
 
 cd /etc/nginx/sites-enabled/
 ln -fs /etc/nginx/sites-available/hasker hasker
 
 
+
+
 echo "*****"
 echo "Installing uWSGI ... "
 
 apt-get -q -y install uwsgi
+
+cat > /etc/uwsgi/apps-available/hasker << EOF
+[uwsgi]
+
+uid = www-data
+gid = www-data
+
+chdir = /home/work/hasker
+module = hasker.wsgi:application
+
+master = true
+processes = 1
+socket = /etc/uwsgi/hasker.sock
+chmod-socket = 664
+vacuum = true
+EOF
+
+cd /etc/uwsgi/apps-enabled/
+ln -fs /etc/uwsgi/apps-available/hasker hasker
+
+cat > /etc/uwsgi/uwsgi_params << EOF
+uwsgi_param  QUERY_STRING       $query_string;
+uwsgi_param  REQUEST_METHOD     $request_method;
+uwsgi_param  CONTENT_TYPE       $content_type;
+uwsgi_param  CONTENT_LENGTH     $content_length;
+
+uwsgi_param  REQUEST_URI        $request_uri;
+uwsgi_param  PATH_INFO          $document_uri;
+uwsgi_param  DOCUMENT_ROOT      $document_root;
+uwsgi_param  SERVER_PROTOCOL    $server_protocol;
+uwsgi_param  REQUEST_SCHEME     $scheme;
+uwsgi_param  HTTPS              $https if_not_empty;
+
+uwsgi_param  REMOTE_ADDR        $remote_addr;
+uwsgi_param  REMOTE_PORT        $remote_port;
+uwsgi_param  SERVER_PORT        $server_port;
+uwsgi_param  SERVER_NAME        $server_name;
+EOF
+
 
 
 echo "*****"
