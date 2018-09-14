@@ -34,11 +34,11 @@ collectstatic:
 
 req:
 	@echo "Installing requirements"
-	@yum -qy install initscripts
-	@yum -qy install nginx
-	@yum -qy install uwsgi
-	@yum -qy install epel-release
-	@yum -qy install python36
-	@yum -qy install python36-setuptools
+	@yum -q -y install initscripts
+	@sh install_nginx.sh
+	@sh install_uwsgi.sh
+	@yum -q -y install epel-release
+	@yum -q -y install python36
+	@yum -q -y install python36-setuptools
 	@easy_install-3.6 pip
 	@pip install --exists-action=s -r requirements.txt
