@@ -36,8 +36,6 @@ req:
 	@echo "Installing requirements"
 	@sh install_nginx.sh
 	@sh install_uwsgi.sh
-	@apt -q -y install epel-release
-	@apt -q -y install python36
-	@apt -q -y install python36-setuptools
-	@easy_install-3.6 pip
-	@pip install --exists-action=s -r requirements.txt
+	@apt -q -y install python3.6
+	@apt-get -y install python3-pip
+	@pip3 install --exists-action=s -r requirements.txt
