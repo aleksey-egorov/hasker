@@ -1,3 +1,4 @@
+echo "*****"
 echo "Installing nginx ... "
 
 apt -q -y install nginx
@@ -34,5 +35,18 @@ EOF
 
 cd /etc/nginx/sites-enabled/
 ln -fs /etc/nginx/sites-available/hasker hasker
+
+
+echo "*****"
+echo "Installing uWSGI ... "
+
+apt-get -q -y install uwsgi
+
+
+echo "*****"
+echo "Installing Python3 ... "
+
+apt-get -q -y install python3.6
+apt-get -q -y install python3-pip
 
 

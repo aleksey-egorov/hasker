@@ -34,8 +34,5 @@ collectstatic:
 
 req:
 	@echo "Installing requirements"
-	@sh install_nginx.sh
-	@sh install_uwsgi.sh
-	@apt -q -y install python3.6
-	@apt-get -y install python3-pip
+	@sh install.sh
 	@pip3 install --exists-action=s -r requirements.txt
