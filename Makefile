@@ -34,7 +34,6 @@ collectstatic:
 
 req:
 	@echo "Installing requirements"
-	@apt -q -y install initscripts
 	@sh install_nginx.sh
 	@sh install_uwsgi.sh
 	@apt -q -y install epel-release
