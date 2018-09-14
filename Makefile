@@ -14,7 +14,7 @@ update:
 prod:
 	@echo "Starting server ... "
 	@make req
-	@service nginx restart
+	@service nginx start
 	##@uwsgi --ini uwsgi.ini
 
 test:
