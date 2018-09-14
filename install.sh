@@ -25,7 +25,7 @@ server {
 
     }
 
-    location / {
+    location /hasker {
         uwsgi_pass  django;
         include     /etc/uwsgi/uwsgi_params;
     }
