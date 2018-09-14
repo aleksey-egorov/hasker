@@ -12,10 +12,10 @@ update:
 	touch reload_project
 
 prod:
-	@echo "Starting server ... "
 	@make req
+	@echo "Starting server ... "
 	@service nginx start
-	##@uwsgi --ini uwsgi.ini
+	@uwsgi --ini /etc/uwsgi/apps-available/hasker.ini
 
 test:
 	DJANGO_SETTINGS_MODULE=$(SETTINGS) ./manage.py test
@@ -33,6 +33,6 @@ collectstatic:
 	DJANGO_SETTINGS_MODULE=$(SETTINGS) $(MANAGE) collectstatic --noinput
 
 req:
-	@echo "Installing requirements"
+	@echo "Installing requirements ..."
 	@sh install.sh
 	@pip3 install --exists-action=s -r requirements.txt
