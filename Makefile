@@ -15,7 +15,7 @@ prod:
 	@echo "Starting server ... "
 	@make req
 	@service nginx restart
-	@uwsgi --ini uwsgi.ini
+	##@uwsgi --ini uwsgi.ini
 
 test:
 	DJANGO_SETTINGS_MODULE=$(SETTINGS) ./manage.py test
