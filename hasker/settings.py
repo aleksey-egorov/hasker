@@ -25,9 +25,9 @@ SECRET_KEY = 'm(3e823=bj_hs9e!&x%+p%@avt4adrl2x&nra6o22jtfj02(s3'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['']
+ALLOWED_HOSTS = ['localhost:8080','localhost:80']
 
-SITE_URL = ''
+SITE_URL = 'localhost:8080'
 
 
 # Application definition

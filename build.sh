@@ -91,3 +91,12 @@ apt-get -q -y install python3-pip
 apt-get -q -y install uwsgi-plugin-python3
 
 
+echo "*****"
+echo "Installing PostgreSQL ... "
+
+echo "deb http://apt.postgresql.org/pub/repos/apt/ $(lsb_release -sc)-pgdg main" > /etc/apt/sources.list.d/pgdg.list
+wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add -
+apt-get update
+apt-get -q -y install postgresql-10
+
+
