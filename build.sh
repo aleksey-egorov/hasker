@@ -100,7 +100,17 @@ apt-get update
 apt-get -q -y install postgresql-10
 service postgresql start
 
-/usr/bin/createdb -U postgres hasker
-/usr/bin/createuser -U postgres hasker
+# Postgres settings
+DB_NAME=hasker
+DB_USER=hasker
+DB_PASSWORD=cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1
+
+
+echo "pass=" + DB_PASSWORD
+su postgres -c "psql -c \"CREATE USER ${DB_USER} PASSWORD '${DB_PASSWORD}'\""
+su postgres -c "psql -c \"CREATE DATABASE ${DB_NAME} OWNER ${DB_USER}\""
+
+#/usr/bin/createdb -U postgres hasker
+#/usr/bin/createuser -U postgres hasker
 
 
