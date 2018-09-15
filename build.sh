@@ -105,12 +105,17 @@ DB_NAME=hasker
 DB_USER=hasker
 DB_PASSWORD=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 8 | head -n 1)
 
-
-echo $DB_PASSWORD
 su postgres -c "psql -c \"DROP DATABASE IF EXISTS ${DB_NAME}\""
 su postgres -c "psql -c \"DROP USER IF EXISTS ${DB_USER}\""
 su postgres -c "psql -c \"CREATE USER ${DB_USER} PASSWORD '${DB_PASSWORD}'\""
 su postgres -c "psql -c \"CREATE DATABASE ${DB_NAME} OWNER ${DB_USER}\""
+
+SECRET = $(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 50 | head -n 1)
+
+cat > /home/work/hasker/hasker/include/secret.py << EOF
+SECRET = '$SECRET'
+DB_PASSWORD = '$DB_PASSWORD'
+EOF
 
 #/usr/bin/createdb -U postgres hasker
 #/usr/bin/createuser -U postgres hasker
