@@ -106,7 +106,9 @@ DB_USER=hasker
 DB_PASSWORD=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 8 | head -n 1)
 
 
-echo DB_PASSWORD
+echo $DB_PASSWORD
+su postgres -c "psql -c \"DROP DATABASE ${DB_NAME} IF EXISTS\""
+su postgres -c "psql -c \"DROP USER ${DB_USER} IF EXISTS\""
 su postgres -c "psql -c \"CREATE USER ${DB_USER} PASSWORD '${DB_PASSWORD}'\""
 su postgres -c "psql -c \"CREATE DATABASE ${DB_NAME} OWNER ${DB_USER}\""
 
