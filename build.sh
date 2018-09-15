@@ -124,7 +124,6 @@ DB_PASSWORD = '${DB_PASSWORD}'
 EOF
 
 cd /home/work/hasker
-python3.6 manage.py collectstatic
 python3.6 manage.py makemigrations
 python3.6 manage.py migrate
 
