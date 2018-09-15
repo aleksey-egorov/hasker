@@ -89,7 +89,9 @@ echo "Installing Python3 ... "
 apt-get -q -y install python3.6
 apt-get -q -y install python3-pip
 apt-get -q -y install uwsgi-plugin-python3
-pip3 install --exists-action=s -r requirements.txt
+pip3 install --exists-action=s -r /home/work/hasker/requirements.txt
+
+
 
 
 echo "*****"
@@ -123,8 +125,8 @@ echo "*****"
 echo "Configuring Django ... "
 
 cd /home/work/hasker
-python manage.py collectstatic
-python manage.py makemigrations
-python manage.py migrate
+python3.6 manage.py collectstatic
+python3.6 manage.py makemigrations
+python3.6 manage.py migrate
 
 
