@@ -100,7 +100,7 @@ apt-get update
 apt-get -q -y install postgresql-10
 service postgresql start
 
-/usr/bin/createdb hasker
-/usr/bin/createuser hasker
+/usr/bin/createdb -U postgres hasker
+/usr/bin/createuser -U postgres hasker
 
 
