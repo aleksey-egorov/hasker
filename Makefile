@@ -35,4 +35,4 @@ collectstatic:
 req:
 	@echo "Installing requirements ..."
 	@sh build.sh
-	@pip3 install --exists-action=s -r requirements.txt
+

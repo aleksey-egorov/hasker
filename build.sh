@@ -89,6 +89,7 @@ echo "Installing Python3 ... "
 apt-get -q -y install python3.6
 apt-get -q -y install python3-pip
 apt-get -q -y install uwsgi-plugin-python3
+pip3 install --exists-action=s -r requirements.txt
 
 
 echo "*****"
@@ -117,7 +118,13 @@ SECRET_KEY = '${SECRET}'
 DB_PASSWORD = '${DB_PASSWORD}'
 EOF
 
-#/usr/bin/createdb -U postgres hasker
-#/usr/bin/createuser -U postgres hasker
+
+echo "*****"
+echo "Configuring Django ... "
+
+cd /home/work/hasker
+python manage.py collectstatic
+python manage.py makemigrations
+python manage.py migrate
 
 
