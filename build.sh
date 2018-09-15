@@ -98,5 +98,9 @@ echo "deb http://apt.postgresql.org/pub/repos/apt/ $(lsb_release -sc)-pgdg main"
 wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add -
 apt-get update
 apt-get -q -y install postgresql-10
+service postgresql start
+
+/usr/bin/createdb hasker
+/usr/bin/createuser hasker
 
 
