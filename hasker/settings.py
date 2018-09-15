@@ -11,7 +11,7 @@ https://docs.djangoproject.com/en/2.1/ref/settings/
 """
 
 import os
-from hasker.secret import DB_PASSWORD, SECRET
+from hasker.secret import DB_PASSWORD, SECRET_KEY
 # from hasker.settings.include import secret
 
 
