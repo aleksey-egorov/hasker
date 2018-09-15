@@ -11,7 +11,8 @@ https://docs.djangoproject.com/en/2.1/ref/settings/
 """
 
 import os
-from hasker.settings.include import secret
+from include import secret
+# from hasker.settings.include import secret
 
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
