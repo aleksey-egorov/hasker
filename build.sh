@@ -56,6 +56,7 @@ processes = 1
 socket = /tmp/hasker.sock
 chmod-socket = 664
 vacuum = true
+plugins = python
 EOF
 
 cd /etc/uwsgi/apps-enabled/
@@ -87,5 +88,6 @@ echo "Installing Python3 ... "
 
 apt-get -q -y install python3.6
 apt-get -q -y install python3-pip
+apt-get -q -y install uwsgi-plugin-python3
 
 
