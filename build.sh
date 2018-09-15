@@ -112,7 +112,7 @@ su postgres -c "psql -c \"CREATE DATABASE ${DB_NAME} OWNER ${DB_USER}\""
 
 SECRET=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 50 | head -n 1)
 
-cat > /home/work/hasker/hasker/include/secret.py << EOF
+cat > /home/work/hasker/hasker/secret.py << EOF
 SECRET = '${SECRET}'
 DB_PASSWORD = '${DB_PASSWORD}'
 EOF

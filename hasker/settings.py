@@ -11,7 +11,7 @@ https://docs.djangoproject.com/en/2.1/ref/settings/
 """
 
 import os
-from settings.include import secret
+import secret
 # from hasker.settings.include import secret
 
 
