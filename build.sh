@@ -56,7 +56,7 @@ processes = 1
 socket = /tmp/hasker.sock
 chmod-socket = 664
 vacuum = true
-plugins = python
+plugins = python36
 EOF
 
 cd /etc/uwsgi/apps-enabled/
