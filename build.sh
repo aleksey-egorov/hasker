@@ -37,7 +37,6 @@ ln -fs /etc/nginx/sites-available/hasker hasker
 
 
 
-
 echo "*****"
 echo "Installing uWSGI ... "
 
@@ -93,7 +92,6 @@ pip3 install --exists-action=s -r /home/work/hasker/requirements.txt
 
 
 
-
 echo "*****"
 echo "Installing PostgreSQL ... "
 
@@ -113,16 +111,17 @@ su postgres -c "psql -c \"DROP USER IF EXISTS ${DB_USER}\""
 su postgres -c "psql -c \"CREATE USER ${DB_USER} PASSWORD '${DB_PASSWORD}'\""
 su postgres -c "psql -c \"CREATE DATABASE ${DB_NAME} OWNER ${DB_USER}\""
 
+
+
+echo "*****"
+echo "Configuring Django ... "
+
 SECRET=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 50 | head -n 1)
 
 cat > /home/work/hasker/hasker/secret.py << EOF
 SECRET_KEY = '${SECRET}'
 DB_PASSWORD = '${DB_PASSWORD}'
 EOF
-
-
-echo "*****"
-echo "Configuring Django ... "
 
 cd /home/work/hasker
 python3.6 manage.py collectstatic
