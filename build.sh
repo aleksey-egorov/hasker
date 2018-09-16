@@ -80,6 +80,8 @@ uwsgi_param  SERVER_PORT        \$server_port;
 uwsgi_param  SERVER_NAME        \$server_name;
 EOF
 
+chown -R www-data:www-data /home/work/hasker/
+
 
 
 echo "*****"
