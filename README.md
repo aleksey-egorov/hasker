@@ -13,11 +13,11 @@
 
     docker build -t hasker .
 
-   Запускем контейнер на localhost:8080:
+Запускем контейнер на localhost:8080:
 
     docker run --rm -dit -p 8080:80 --name hasker hasker
 
-   Вход в контейнер
+Вход в контейнер
 
     docker exec -it hasker /bin/bash
 
