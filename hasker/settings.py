@@ -23,7 +23,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/2.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-#SECRET_KEY = 'm(3e823=bj_hs9e!&x%+p%@avt4adrl2x&nra6o22jtfj02(s3'
+#SECRET_KEY = ''
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -31,6 +31,12 @@ DEBUG = True
 ALLOWED_HOSTS = ['localhost']
 
 SITE_URL = 'localhost:8080'
+
+EMAIL_HOST = 'smtp.yandex.ru'
+EMAIL_PORT = 465
+EMAIL_HOST_USER = 'hasker123'
+EMAIL_HOST_PASSWORD = 'hasker'
+EMAIL_USE_SSL = True
 
 
 # Application definition
@@ -149,7 +155,7 @@ LOGOUT_REDIRECT_URL = '/'
 LOGIN_REDIRECT_URL = '/'
 LOGIN_URL = '/login/'
 
-EMAIL_FROM = 'info@daiteco.ru'
+EMAIL_FROM = 'hasker123@yandex.ru'
 EMAIL_MESSAGES = {
     'sign_up': [
         'Hasker - registration',

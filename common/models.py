@@ -32,8 +32,8 @@ class Mailer(models.Model):
             msg = settings.EMAIL_MESSAGES[alias]
             subject = msg[0]
             message = self.replace_context(msg[1], context) + settings.EMAIL_SIGN
-            send_mail(subject, message,
-                settings.EMAIL_FROM, [email],
+            send_mail(subject, message=' ', html_message=message,
+                from_email=settings.EMAIL_FROM, recipient_list=[email],
                 fail_silently=False,
             )
             return message
