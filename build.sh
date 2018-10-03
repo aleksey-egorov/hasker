@@ -1,6 +1,7 @@
 echo "*****"
 echo "Installing nginx ... "
 
+apt-get update
 apt -q -y install nginx
 
 cat > /etc/nginx/sites-available/hasker << EOF
