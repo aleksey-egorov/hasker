@@ -35,4 +35,5 @@ collectstatic:
 req:
 	@echo "Installing requirements ..."
 	@sh build.sh
+	@sh configure.sh
 
