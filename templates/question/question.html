@@ -20,8 +20,8 @@
                     <div class="wrap">
                          <div class="cnt">{{ question.content }}</div>
                          <div class="tags">
-                                        {% for tag in question.tags_list %}
-                                            <a href="/tag/{{ tag }}/">{{ tag }}</a>
+                             {% for tag in question.tags.all %}
+                                            <a href="/tag/{{ tag.name }}/">{{ tag.name }}</a>
                                         {% endfor %}
                                     </div>
                          <div class="sign">
@@ -43,9 +43,10 @@
                             <div class="answer_vote up_arrow {% if answer.active_user_vote == 1 %} active {% endif %} {% if user.is_authenticated %} changeable {% endif %}" data-id="{{ answer.id }}"></div>
                             <div class="votes"><span>{{ answer.votes }}</span></div>
                             <div class="answer_vote down_arrow {% if answer.active_user_vote == -1 %} active {% endif %} {% if user.is_authenticated %} changeable {% endif %}" data-id="{{ answer.id }}"></div>
-                            {% if question.author == user.id %}
-                            <div class="best_answer for_author {% if answer.best == True %} active {% endif %}" data-id="{{ answer.id }}"></div>
-                            {% elif answer.best == True %}
+
+                            {% if question.author.id == user.id %}
+                            <div class="best_answer for_author {% if question.best_answer == answer %} active {% endif %}" data-id="{{ answer.id }}"></div>
+                            {% elif question.best_answer == answer %}
                             <div class="best_answer active"></div>
                             {% endif %}
                         </div>

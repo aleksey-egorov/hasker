@@ -20,9 +20,9 @@
                                         {{ question.heading }}
                                     </a>
                                     <div class="tags">
-                                         {% for tag in question.tags_list %}
-                                            <a href="/tag/{{ tag }}/">{{ tag }}</a>
-                                         {% endfor %}
+                                         {% for tag in question.tags.all %}
+                                            <a href="/tag/{{ tag.name }}/">{{ tag.name }}</a>
+                                        {% endfor %}
                                     </div>
                                 </div>
                             </li>

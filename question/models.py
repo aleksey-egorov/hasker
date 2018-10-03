@@ -1,19 +1,20 @@
-from django.contrib.auth.models import User
 from django.db import models
 from django.utils import timezone
 from django.dispatch import receiver
 from django.db.models.signals import post_save, post_delete
+from django.conf import settings
 
 # Create your models here.
 
 class Question(models.Model):
     heading = models.CharField(max_length=255)
     content = models.TextField()
-    tags = models.CharField(max_length=255)
+    tags = models.ManyToManyField('Tag')
     pub_date = models.DateTimeField('date published')
     votes = models.IntegerField(default=0)
     answers = models.IntegerField(default=0)
-    author = models.ForeignKey(User, on_delete=models.CASCADE, default=0)
+    author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, default=0)
+    best_answer = models.ForeignKey('Answer', default=None, null=True, on_delete=models.SET_NULL)
 
     def published(self):
         delta = timezone.now() - self.pub_date
@@ -36,12 +37,7 @@ class Question(models.Model):
         return self.author.username
 
     def author_avatar(self):
-        return self.author.profile.avatar
-
-    def tags_list(self):
-        list = self.tags.split(",")
-        list = [x.strip() for x in list]
-        return list
+        return self.author.avatar
 
     def recount_votes(self):
         votes = QuestionVote.objects.filter(reference=self).aggregate(models.Sum('value'))
@@ -51,7 +47,7 @@ class Question(models.Model):
         self.save()
 
     def recount_answers(self):
-        self.answers = Answer.objects.filter(question=self).count()
+        self.answers = Answer.objects.filter(question_ref=self).count()
         if self.answers == None:
             self.answers = 0
         self.save()
@@ -68,13 +64,24 @@ class Trend(object):
         return Question.objects.order_by('-votes')[:5]
 
 
+class Tag(models.Model):
+    name = models.CharField(max_length=60)
+
+
 class Answer(models.Model):
     content = models.TextField()
-    question = models.ForeignKey(Question, on_delete=models.CASCADE, default=0)
-    author = models.ForeignKey(User, on_delete=models.CASCADE, default=0)
+    question_ref = models.ForeignKey(Question, on_delete=models.CASCADE, null=False, blank=False)
+    author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, default=0)
     pub_date = models.DateTimeField('date published')
     votes = models.IntegerField(default=0)
-    best = models.BooleanField(default=False)
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        self._update_question()
+
+    def delete(self, *args, **kwargs):
+        super().delete(*args, **kwargs)
+        self._update_question()
 
     def recount_votes(self):
         votes = AnswerVote.objects.filter(reference=self).aggregate(models.Sum('value'))
@@ -87,60 +94,46 @@ class Answer(models.Model):
         return self.author.username
 
     def author_avatar(self):
-        return self.author.profile.avatar
+        return self.author.avatar
 
     def active_vote(self, user_id):
         if AnswerVote.objects.filter(reference=self, author=user_id).exists():
             existing_vote = AnswerVote.objects.get(reference=self, author=user_id)
             return existing_vote.value
 
-@receiver(post_save, sender=Answer)
-def create_answer(sender, instance, created, **kwargs):
-    if created:
-        instance.question.recount_answers()
-
-@receiver(post_save, sender=Answer)
-def update_answer(sender, instance, **kwargs):
-    instance.question.recount_answers()
-
-@receiver(post_delete, sender=Answer)
-def delete_answer(sender, instance, **kwargs):
-    instance.question.recount_answers()
+    def _update_question(self):
+        self.question_ref.recount_answers()
 
 
 class AnswerVote(models.Model):
     reference = models.ForeignKey(Answer, on_delete=models.CASCADE, default=0)
-    author = models.ForeignKey(User, on_delete=models.CASCADE, default=0)
+    author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, default=0)
     value = models.IntegerField(default=0)
 
-@receiver(post_save, sender=AnswerVote)
-def create_answer_vote(sender, instance, created, **kwargs):
-    if created:
-        instance.reference.recount_votes()
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        self._update_ans_votes()
 
-@receiver(post_save, sender=AnswerVote)
-def update_answer_vote(sender, instance, **kwargs):
-    instance.reference.recount_votes()
+    def delete(self, *args, **kwargs):
+        super().delete(*args, **kwargs)
+        self._update_ans_votes()
 
-@receiver(post_delete, sender=AnswerVote)
-def delete_answer_vote(sender, instance, **kwargs):
-    instance.reference.recount_votes()
+    def _update_ans_votes(self):
+        self.reference.recount_votes()
 
 
 class QuestionVote(models.Model):
     reference = models.ForeignKey(Question, on_delete=models.CASCADE, default=0)
-    author = models.ForeignKey(User, on_delete=models.CASCADE, default=0)
+    author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, default=0)
     value = models.IntegerField(default=0)
 
-@receiver(post_save, sender=QuestionVote)
-def create_quest_vote(sender, instance, created, **kwargs):
-    if created:
-        instance.reference.recount_votes()
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        self._update_quest_votes()
 
-@receiver(post_save, sender=QuestionVote)
-def update_quest_vote(sender, instance, **kwargs):
-    instance.reference.recount_votes()
+    def delete(self, *args, **kwargs):
+        super().delete(*args, **kwargs)
+        self._update_quest_votes()
 
-@receiver(post_delete, sender=QuestionVote)
-def delete_quest_vote(sender, instance, **kwargs):
-    instance.reference.recount_votes()
+    def _update_quest_votes(self):
+        self.reference.recount_votes()

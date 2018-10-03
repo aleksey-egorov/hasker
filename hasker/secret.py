@@ -1,2 +1,2 @@
 SECRET_KEY = ' '
-DB_PASSWORD = ' '
+DB_PASSWORD = 'e4ks5G8u'

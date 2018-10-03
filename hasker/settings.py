@@ -12,31 +12,21 @@ https://docs.djangoproject.com/en/2.1/ref/settings/
 
 import os
 from hasker.secret import DB_PASSWORD, SECRET_KEY
-# from hasker.settings.include import secret
+from hasker.custom import ALLOWED_HOSTS, SITE_URL, EMAIL_HOST, EMAIL_PORT, EMAIL_HOST_USER, EMAIL_HOST_PASSWORD
+from hasker.custom import EMAIL_USE_SSL, EMAIL_FROM, EMAIL_MESSAGES, EMAIL_SIGN
 
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/2.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-#SECRET_KEY = ''
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['localhost']
-
-SITE_URL = 'localhost:8080'
-
-EMAIL_HOST = 'smtp.yandex.ru'
-EMAIL_PORT = 465
-EMAIL_HOST_USER = 'hasker123'
-EMAIL_HOST_PASSWORD = 'hasker'
-EMAIL_USE_SSL = True
 
 
 # Application definition
@@ -48,10 +38,11 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'index.apps.IndexConfig',
     'question.apps.QuestionConfig',
-    'common.apps.CommonConfig',
+    'user.apps.UserConfig',
 ]
+
+AUTH_USER_MODEL = 'user.User'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -128,6 +119,8 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 
+
+
 # Internationalization
 # https://docs.djangoproject.com/en/2.1/topics/i18n/
 
@@ -154,17 +147,3 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 LOGOUT_REDIRECT_URL = '/'
 LOGIN_REDIRECT_URL = '/'
 LOGIN_URL = '/login/'
-
-EMAIL_FROM = 'hasker123@yandex.ru'
-EMAIL_MESSAGES = {
-    'sign_up': [
-        'Hasker - registration',
-        'Hello!<br>You are now signed up. Your login: <%LOGIN%> <br><br>'
-    ],
-    'new_answer': [
-        'Hasker - added new answer to your question',
-        'Hello!<br>New answer to your question has been added. You can find it on this page: <%LINK%> <br><br>'
-    ]
-}
-
-EMAIL_SIGN = 'With best wishes,<br>Hasker'

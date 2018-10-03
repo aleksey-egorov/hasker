@@ -8,11 +8,27 @@ from django.db.models import Q
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.conf import settings
 
-from common.models import Mailer
-from question.models import Question, Trend, Answer, AnswerVote, QuestionVote
+from utils.mailer import Mailer
+from question.models import Question, Tag, Trend, Answer, AnswerVote, QuestionVote
 from .forms import AskForm, AnswerForm
 
+
 # Create your views here.
+
+class IndexView(View):
+
+    def get(self, request):
+        quest_list = Question.objects.order_by('-pub_date')
+        paginator = Paginator(quest_list, 20)
+        page = request.GET.get('page')
+        questions = paginator.get_page(page)
+
+        return render(request, "question/index.html", {
+            "questions": questions,
+            "page": page,
+            "trends": Trend.get_trends()
+        })
+
 
 class AskView(LoginRequiredMixin, View):
 
@@ -26,19 +42,27 @@ class AskView(LoginRequiredMixin, View):
     def post(self, request):
         form = AskForm(request.POST)
         if form.is_valid():
-            new_question = Question(heading=form.cleaned_data['heading'],
-                                    content=form.cleaned_data['content'],
-                                    tags=form.cleaned_data['tags'],
-                                    pub_date=datetime.datetime.now(),
-                                    author=request.user)
-            new_question.save()
+            with transaction.atomic():
+                new_question = Question(heading=form.cleaned_data['heading'],
+                                        content=form.cleaned_data['content'],
+                                        pub_date=datetime.datetime.now(),
+                                        author=request.user)
+                new_question.save()
+                for tag in form.cleaned_data['tags_list']:
+                    tag = tag.strip()
+                    if Tag.objects.filter(name=tag).exists():
+                        new_tag = Tag.objects.get(name=tag)
+                    else:
+                        new_tag = Tag(name=tag)
+                        new_tag.save()
+                    new_question.tags.add(new_tag)
             return HttpResponseRedirect('/question/' + str(new_question.id) + '/')
         else:
             message = 'Error while adding'
             return render(request, "question/ask.html", {
-                "form": form,
-                "message": message,
-                "trends": Trend.get_trends()
+                    "form": form,
+                    "message": message,
+                    "trends": Trend.get_trends()
             })
 
 
@@ -47,7 +71,7 @@ class QuestionView(View):
     def get(self, request, id):
         form = AnswerForm()
         quest = Question.objects.get(id=id)
-        answers_set = Answer.objects.filter(question=quest).order_by('-votes','-pub_date')
+        answers_set = Answer.objects.filter(question_ref=quest).order_by('-votes','-pub_date')
         quest.active_user_vote = quest.active_vote(request.user.id)
         answers = []
         for answer in answers_set:
@@ -71,12 +95,12 @@ class QuestionView(View):
             if form.is_valid():
                 quest = Question.objects.get(id=id)
                 new_answer = Answer(content=form.cleaned_data['answer'],
-                                      question=quest,
-                                      pub_date=datetime.datetime.now(),
-                                      author=request.user)
+                                    question_ref=quest,
+                                    pub_date=datetime.datetime.now(),
+                                    author=request.user)
                 new_answer.save()
 
-                url = 'http://' + settings.SITE_URL + '/question/' + str(new_answer.question.id) + '/'
+                url = 'http://' + settings.SITE_URL + '/question/' + str(new_answer.question_ref.id) + '/'
                 link = '<a href="'+ url +'">' + url + '</a>'
                 Mailer().send(quest.author.email, 'new_answer', context={"link": link})
 
@@ -115,19 +139,21 @@ class VoteView(LoginRequiredMixin, View):
 
             if vote.objects.filter(reference=ref_obj, author=request.user).exists():
                 existing_vote = vote.objects.get(reference=ref_obj, author=request.user)
-                if existing_vote.value == val:
-                    existing_vote.delete()
-                    result = 'delete'
-                else:
-                    existing_vote.value = val
-                    existing_vote.save()
-                    result = 'update'
+                with transaction.atomic():
+                    if existing_vote.value == val:
+                        existing_vote.delete()
+                        result = 'delete'
+                    else:
+                        existing_vote.value = val
+                        existing_vote.save()
+                        result = 'update'
                 votes = existing_vote.reference.votes
             else:
-                new_vote = vote(reference=ref_obj,
-                                author=request.user,
-                                value=val)
-                new_vote.save()
+                with transaction.atomic():
+                    new_vote = vote(reference=ref_obj,
+                                    author=request.user,
+                                    value=val)
+                    new_vote.save()
                 result = 'add'
                 votes = new_vote.reference.votes
 
@@ -144,16 +170,15 @@ class BestAnswerView(LoginRequiredMixin, View):
         answer = Answer.objects.get(id=answer_id)
 
         result = 'error'
-        if answer.question.author == request.user:
+        if answer.question_ref.author == request.user:
             with transaction.atomic():
-                if answer.best == True:
-                    answer.best = False
-                    answer.save()
+                if answer.question_ref.best_answer == answer:
+                    answer.question_ref.best_answer = None
+                    answer.question_ref.save()
                     result = 'delete'
                 else:
-                    Answer.objects.filter(question=answer.question).update(best=False)
-                    answer.best = True
-                    answer.save()
+                    answer.question_ref.best_answer = answer
+                    answer.question_ref.save()
                     result = 'update'
 
         return render(request, "question/best.html", {
@@ -181,16 +206,18 @@ class TagView(View):
 
     def get(self, request, tag):
         tag = str(tag).strip()
-        quest_list = Question.objects.filter(tags__icontains=tag).order_by('votes','-pub_date')[:20]
-        paginator = Paginator(quest_list, 20)
-        page = request.GET.get('page')
+        if Tag.objects.filter(name=tag).exists():
+            tag_elem = Tag.objects.get(name=tag)
+            quest_list = Question.objects.filter(tags=tag_elem).order_by('votes','-pub_date')[:20]
+            paginator = Paginator(quest_list, 20)
+            page = request.GET.get('page')
 
-        try:
-            questions = paginator.get_page(page)
-        except PageNotAnInteger:
-            questions = paginator.get_page(1)
-        except EmptyPage:
-            questions = paginator.get_page(page)
+            try:
+                questions = paginator.get_page(page)
+            except PageNotAnInteger:
+                questions = paginator.get_page(1)
+            except EmptyPage:
+                questions = paginator.get_page(page)
 
         return render(request, "question/search.html", {
             "questions": questions,

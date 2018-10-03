@@ -21,7 +21,7 @@
             </div>
             {% if user.is_authenticated %}
                 <div class="avatar">
-                    <a href="/settings/"><div style="background-image:url('/media/{{ user.profile.avatar }}');background-size:cover;background-repeat:no-repeat;background-position:center center;" class="avatar_img"></div></a>
+                    <a href="/settings/"><div style="background-image:url('/media/{{ user.avatar }}');background-size:cover;background-repeat:no-repeat;background-position:center center;" class="avatar_img"></div></a>
                 </div>
                 <div class="info">
                     <div class="username"><a href="/settings/">{{ user.username }}</a></div>

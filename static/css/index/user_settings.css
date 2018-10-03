@@ -1,6 +1,7 @@
 #user_settings_ul .rcon{
     padding-top:5px;
     float:left;
+
 }
 
 #user_settings_ul .rcon .avatar {
@@ -27,6 +28,7 @@
     display:block;
     float:left;
     padding-left:5px;
+
 }
 
 #user_settings_ul .rcon .avatar_field {
