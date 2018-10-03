@@ -127,6 +127,7 @@ EOF
 
 cd /home/work/hasker
 
+PYTHONPATH = /usr/local/lib/python3.6/dist-packages/
 /usr/bin/python3 manage.py makemigrations admin auth contenttypes sessions user question
 /usr/bin/python3 manage.py migrate
 
