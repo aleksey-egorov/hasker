@@ -126,6 +126,7 @@ DB_PASSWORD = '${DB_PASSWORD}'
 EOF
 
 cd /home/work/hasker
+source ~/.bashrc
 python3 manage.py makemigrations admin auth contenttypes sessions user question
 python3 manage.py migrate
 
