@@ -1,6 +1,6 @@
 # Domain settings
 
-ALLOWED_HOSTS = ['localhost','test.daiteco.ru']
+ALLOWED_HOSTS = ['localhost']
 SITE_URL = 'localhost:8080'
 
 
