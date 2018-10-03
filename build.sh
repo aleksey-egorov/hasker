@@ -87,9 +87,9 @@ chown -R www-data:www-data /home/work/hasker/
 echo "*****"
 echo "Installing Python3 ... "
 
-apt-get -q -y install python3.6
-apt-get -q -y install python3-pip
-apt-get -q -y install uwsgi-plugin-python3
+apt -q -y install python3.6
+apt -q -y install python3-pip
+apt -q -y install uwsgi-plugin-python3
 pip3 install --exists-action=s -r /home/work/hasker/requirements.txt
 
 
