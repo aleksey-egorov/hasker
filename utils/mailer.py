@@ -1,4 +1,5 @@
 import re
+import logging
 
 from django.core.mail import send_mail
 from django.conf import settings
@@ -6,6 +7,7 @@ from django.conf import settings
 class Mailer():
 
     def send(self, email, alias, context):
+        logger = logging.getLogger(__name__)
         try:
             msg = settings.EMAIL_MESSAGES[alias]
             subject = msg[0]
@@ -15,8 +17,8 @@ class Mailer():
                 fail_silently=False,
             )
             return message
-        except:
-            pass
+        except Exception as err:
+            logger.error(err)
 
     def replace_context(self, msg, context):
         if isinstance(context, dict):

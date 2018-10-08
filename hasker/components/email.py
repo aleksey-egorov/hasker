@@ -1,9 +1,3 @@
-# Domain settings
-
-ALLOWED_HOSTS = ['localhost']
-SITE_URL = 'localhost:8080'
-
-
 # E-mail settings
 
 EMAIL_HOST = ''
