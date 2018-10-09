@@ -153,8 +153,7 @@ class Answer(models.Model):
 
 class VoteManager(object):
 
-    @staticmethod
-    def check(vote, ref_obj, value, user):
+    def check(self, vote, ref_obj, value, user):
         if not vote == None and not ref_obj == None and value in ('up', 'down'):
             if value == 'up':
                 val = 1
@@ -162,26 +161,30 @@ class VoteManager(object):
                 val = -1
 
             if vote.objects.filter(reference=ref_obj, author=user).exists():
-                existing_vote = vote.objects.get(reference=ref_obj, author=user)
-                with transaction.atomic():
-                    if existing_vote.value == val:
-                        existing_vote.delete()
-                        result = 'delete'
-                    else:
-                        existing_vote.value = val
-                        existing_vote.save()
-                        result = 'update'
-                votes = existing_vote.reference.votes
+                return self.set_existing_vote(vote, ref_obj, val, user)
             else:
-                with transaction.atomic():
-                    new_vote = vote(reference=ref_obj,
-                                    author=user,
-                                    value=val)
-                    new_vote.save()
-                result = 'add'
-                votes = new_vote.reference.votes
+                return self.add_new_vote(vote, ref_obj, val, user)
 
-            return votes, result
+    def add_new_vote(self, vote, ref_obj, val, user):
+        with transaction.atomic():
+            new_vote = vote(reference=ref_obj,
+                            author=user,
+                            value=val)
+            new_vote.save()
+        result = 'add'
+        return new_vote.reference.votes, result
+
+    def set_existing_vote(self, vote, ref_obj, val, user):
+        existing_vote = vote.objects.get(reference=ref_obj, author=user)
+        with transaction.atomic():
+            if existing_vote.value == val:
+                existing_vote.delete()
+                result = 'delete'
+            else:
+                existing_vote.value = val
+                existing_vote.save()
+                result = 'update'
+        return existing_vote.reference.votes, result
 
 
 class AnswerVote(models.Model):

@@ -106,7 +106,7 @@ class VoteView(LoginRequiredMixin, View):
         else:
             return
 
-        votes, result = VoteManager.check(vote, ref_obj, value, request.user)
+        votes, result = VoteManager().check(vote, ref_obj, value, request.user)
         return render(request, "question/vote.html", {
             "result": result,
             "votes": votes
