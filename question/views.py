@@ -1,15 +1,15 @@
-import datetime
 from django.shortcuts import render
 from django.http import HttpResponseRedirect
 from django.views.generic import View
+from django.views.generic.list import MultipleObjectMixin
 from django.db import transaction
 from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
 from django.db.models import Q
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.conf import settings
 
 from utils.mailer import Mailer
-from question.models import Question, Tag, Trend, Answer, AnswerVote, QuestionVote
+from utils.question import make_question_url
+from question.models import Question, Tag, Trend, Answer, AnswerVote, QuestionVote, VoteManager
 from .forms import AskForm, AnswerForm
 
 
@@ -42,21 +42,8 @@ class AskView(LoginRequiredMixin, View):
     def post(self, request):
         form = AskForm(request.POST)
         if form.is_valid():
-            with transaction.atomic():
-                new_question = Question(heading=form.cleaned_data['heading'],
-                                        content=form.cleaned_data['content'],
-                                        pub_date=datetime.datetime.now(),
-                                        author=request.user)
-                new_question.save()
-                for tag in form.cleaned_data['tags_list']:
-                    tag = tag.strip()
-                    if Tag.objects.filter(name=tag).exists():
-                        new_tag = Tag.objects.get(name=tag)
-                    else:
-                        new_tag = Tag(name=tag)
-                        new_tag.save()
-                    new_question.tags.add(new_tag)
-            return HttpResponseRedirect('/question/' + str(new_question.id) + '/')
+            new_question_id = Question.add_question(form.cleaned_data, request.user)
+            return HttpResponseRedirect('/question/' + str(new_question_id) + '/')
         else:
             message = 'Error while adding'
             return render(request, "question/ask.html", {
@@ -66,48 +53,35 @@ class AskView(LoginRequiredMixin, View):
             })
 
 
-class QuestionView(View):
+class QuestionView(MultipleObjectMixin, View):
 
     def get(self, request, id):
         form = AnswerForm()
         quest = Question.objects.get(id=id)
-        answers_set = Answer.objects.filter(question_ref=quest).order_by('-votes','-pub_date')
         quest.active_user_vote = quest.active_vote(request.user.id)
-        answers = []
-        for answer in answers_set:
-            answer.active_user_vote = answer.active_vote(request.user.id)
-            answers.append(answer)
+        answers_set = Answer.get_answers(quest, request.user.id)
 
-        paginator = Paginator(answers, 30)
         page = request.GET.get('page')
+        paginator = self.get_paginator(answers_set, 30)
         answers = paginator.get_page(page)
 
         return render(request, "question/question.html", {
             "trends": Trend.get_trends(),
             "form": form,
             "question": quest,
-            "answers": answers
+            "answers": answers,
         })
 
     def post(self, request, id):
         if request.user.is_authenticated:
             form = AnswerForm(request.POST)
             if form.is_valid():
-                quest = Question.objects.get(id=id)
-                new_answer = Answer(content=form.cleaned_data['answer'],
-                                    question_ref=quest,
-                                    pub_date=datetime.datetime.now(),
-                                    author=request.user)
-                new_answer.save()
-
-                url = 'http://' + settings.SITE_URL + '/question/' + str(new_answer.question_ref.id) + '/'
-                link = '<a href="'+ url +'">' + url + '</a>'
-                Mailer().send(quest.author.email, 'new_answer', context={"link": link})
-
+                quest_author_email = Answer.add(id, form.cleaned_data, request.user)
+                url, link = make_question_url(id)
+                Mailer.send(quest_author_email, 'new_answer', context={"link": link})
                 return HttpResponseRedirect(url)
             else:
                 message = 'Error while adding'
-
                 return render(request, "question/question.html", {
                     "form": form,
                     "id": id,
@@ -123,40 +97,16 @@ class VoteView(LoginRequiredMixin, View):
         obj_id = int(request.GET.get('id'))
         value = request.GET.get('value')
 
-        result = 'error'
-        votes = 0
-        if type in ('answer', 'question') and obj_id > 0 and value in ('up', 'down'):
-            if value == 'up':
-                val = 1
-            else:
-                val = -1
-            if type == 'answer':
-                vote = AnswerVote
-                ref_obj = Answer.objects.get(id=obj_id)
-            else:
-                vote = QuestionVote
-                ref_obj = Question.objects.get(id=obj_id)
+        if type == 'answer':
+            vote = AnswerVote
+            ref_obj = Answer.objects.get(id=obj_id)
+        elif type == 'question':
+            vote = QuestionVote
+            ref_obj = Question.objects.get(id=obj_id)
+        else:
+            return
 
-            if vote.objects.filter(reference=ref_obj, author=request.user).exists():
-                existing_vote = vote.objects.get(reference=ref_obj, author=request.user)
-                with transaction.atomic():
-                    if existing_vote.value == val:
-                        existing_vote.delete()
-                        result = 'delete'
-                    else:
-                        existing_vote.value = val
-                        existing_vote.save()
-                        result = 'update'
-                votes = existing_vote.reference.votes
-            else:
-                with transaction.atomic():
-                    new_vote = vote(reference=ref_obj,
-                                    author=request.user,
-                                    value=val)
-                    new_vote.save()
-                result = 'add'
-                votes = new_vote.reference.votes
-
+        votes, result = VoteManager().check(vote, ref_obj, value, request.user)
         return render(request, "question/vote.html", {
             "result": result,
             "votes": votes
@@ -171,15 +121,7 @@ class BestAnswerView(LoginRequiredMixin, View):
 
         result = 'error'
         if answer.question_ref.author == request.user:
-            with transaction.atomic():
-                if answer.question_ref.best_answer == answer:
-                    answer.question_ref.best_answer = None
-                    answer.question_ref.save()
-                    result = 'delete'
-                else:
-                    answer.question_ref.best_answer = answer
-                    answer.question_ref.save()
-                    result = 'update'
+            result = answer.set_best_answer()
 
         return render(request, "question/best.html", {
             "result": result
