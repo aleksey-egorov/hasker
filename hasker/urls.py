@@ -14,12 +14,22 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path, re_path, include
+from django.urls import path, re_path
+from django.conf.urls import url, include
 from django.contrib.auth import views as auth_views
+from rest_framework import routers
+from rest_framework_jwt.views import obtain_jwt_token
 
 from user.views import SignupView, SignupDoneView, UserSettingsView
 from question.models import Trend
 from question.views import IndexView, AskView, QuestionView, QuestionListView, VoteView, BestAnswerView, SearchView, TagView
+from api.views import IndexViewSet, TrendingViewSet, SearchViewSet, QuestionViewSet
+
+router = routers.DefaultRouter()
+router.register(r'(?P<version>(v1|v2))/index', IndexViewSet)
+router.register(r'(?P<version>(v1|v2))/trending', TrendingViewSet)
+router.register(r'(?P<version>(v1|v2))/search', SearchViewSet, basename='search-list')
+router.register(r'(?P<version>(v1|v2))/questions', QuestionViewSet, basename='question-detail')
 
 urlpatterns = [
     path('login/', auth_views.LoginView.as_view(
@@ -37,5 +47,8 @@ urlpatterns = [
     path('search/', SearchView.as_view(), name="question_search"),
     path('tag/<str:tag>/', TagView.as_view(), name="question_tag"),
     path('admin/', admin.site.urls),
+    url(r'^api/', include(router.urls)),
+    url(r'^api-token-auth/', obtain_jwt_token),
+   #url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework')),
     path('', IndexView.as_view()),
 ]
