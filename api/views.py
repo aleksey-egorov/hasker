@@ -1,23 +1,30 @@
-from django.contrib.auth.models import User, Group
-from rest_framework import viewsets
+from django.conf import settings
 from django.db.models import Q
-from django.shortcuts import get_object_or_404, get_list_or_404
+from rest_framework.decorators import api_view, schema, renderer_classes
 from rest_framework.response import Response
-from rest_framework.decorators import action
+from rest_framework import generics
+from rest_framework.exceptions import NotFound
+from rest_framework_swagger.renderers import OpenAPIRenderer, SwaggerUIRenderer
+from rest_framework import response, schemas
 
 from question.models import Question, Answer
 from api.serializers import IndexSerializer, TrendingSerializer, SearchSerializer, QuestionSerializer, AnswerSerializer
 
 
-class IndexViewSet(viewsets.ModelViewSet):
+class IndexAPIView(generics.ListAPIView):
+    '''List of questions with pagination'''
     queryset = Question.objects.all().order_by('-pub_date')
     serializer_class = IndexSerializer
 
-class TrendingViewSet(viewsets.ModelViewSet):
+class TrendingAPIView(generics.ListAPIView):
+    '''Ten most popular questions'''
     queryset = Question.objects.order_by('-votes')[:10]
     serializer_class = TrendingSerializer
 
-class SearchViewSet(viewsets.ModelViewSet):
+class SearchAPIView(generics.ListAPIView):
+    '''Search question.
+       Uses GET parameter "q" for searching
+    '''
     serializer_class = SearchSerializer
 
     def get_queryset(self):
@@ -25,22 +32,34 @@ class SearchViewSet(viewsets.ModelViewSet):
         queryset = Question.objects.filter(Q(heading__icontains=query) | Q(content__icontains=query)).order_by('votes','-pub_date')[:20]
         return queryset
 
-class QuestionViewSet(viewsets.ModelViewSet):
+class QuestionAPIView(generics.RetrieveAPIView):
+    '''Question details'''
+    serializer_class = QuestionSerializer
+    lookup_field = 'pk'
+    queryset = Question.objects.all()
 
-    def retrieve(self, request, version=None, pk=None):
-        question = get_object_or_404(Question, pk=pk)
-        serializer = QuestionSerializer(question)
-        return Response(serializer.data)
+class QuestionAnswersAPIView(generics.ListAPIView):
+    '''Question answers list with pagination'''
+    serializer_class = AnswerSerializer
+    lookup_field = 'pk'
 
-    @action(methods=['get'], detail=True, url_path='answers', url_name='answers')
-    def answers(self, request, version=None, pk=None):
-        if version == 'v1':
-            question = get_object_or_404(Question, pk=pk)
-            answers = Answer.objects.filter(question_ref=question).order_by('votes').all()
-            serializer = AnswerSerializer(answers, many=True)
-            return Response(serializer.data)
-        elif version == 'v2':
-            question = get_object_or_404(Question, pk=pk)
-            answers = Answer.objects.filter(question_ref=question).order_by('-pub_date').all()
-            serializer = AnswerSerializer(answers, many=True)
-            return Response(serializer.data)
+    def get_queryset(self, *args, **kwargs):
+        question_id = self.kwargs.get("pk")
+        try:
+            question = Question.objects.get(id=question_id)
+        except Question.DoesNotExist:
+            raise NotFound()
+        answers = Answer.objects.filter(question_ref=question).order_by('votes').all()
+        return answers
+
+@api_view()
+@schema(None)
+@renderer_classes([SwaggerUIRenderer, OpenAPIRenderer])
+def schema_view(request):
+    generator = schemas.SchemaGenerator(title='Pastebin API')
+    return response.Response(generator.get_schema(request=request))
+
+@api_view()
+@schema(None)
+def wrong_url(request):
+    return Response({"message": "Wrong URL: check API documentation at http://{}/api/docs/".format(settings.SITE_URL)})
