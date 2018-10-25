@@ -38,3 +38,17 @@
     uwsgi --ini /etc/uwsgi/apps-available/hasker.ini
 
 
+## API
+
+Документация к API
+
+    http://localhost:8080/api/docs/
+
+Swagger-схема находится в файле swagger_scheme.json
+
+Тестирование API:
+
+    python manage.py test
+
+
+
