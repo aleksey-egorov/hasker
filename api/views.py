@@ -56,7 +56,7 @@ class QuestionAnswersAPIView(generics.ListAPIView):
 @schema(None)
 @renderer_classes([SwaggerUIRenderer, OpenAPIRenderer])
 def schema_view(request):
-    generator = schemas.SchemaGenerator(title='Pastebin API')
+    generator = schemas.SchemaGenerator(title='Hasker API')
     return response.Response(generator.get_schema(request=request))
 
 @api_view()
