@@ -44,7 +44,7 @@
 
     http://localhost:8080/api/docs/
 
-Swagger-схема находится в файле swagger_scheme.json
+Swagger-схема находится в файле swagger.yaml
 
 Тестирование API:
 
