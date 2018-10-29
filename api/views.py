@@ -6,6 +6,7 @@ from rest_framework import generics
 from rest_framework.exceptions import NotFound
 from rest_framework_swagger.renderers import OpenAPIRenderer, SwaggerUIRenderer
 from rest_framework import response, schemas
+from django.shortcuts import render
 
 from question.models import Question, Answer
 from api.serializers import IndexSerializer, TrendingSerializer, SearchSerializer, QuestionSerializer, AnswerSerializer
@@ -52,12 +53,8 @@ class QuestionAnswersAPIView(generics.ListAPIView):
         answers = Answer.objects.filter(question_ref=question).order_by('votes').all()
         return answers
 
-@api_view()
-@schema(None)
-@renderer_classes([SwaggerUIRenderer, OpenAPIRenderer])
 def schema_view(request):
-    generator = schemas.SchemaGenerator(title='Hasker API')
-    return response.Response(generator.get_schema(request=request))
+    return render(request, "api/index.html", {})
 
 @api_view()
 @schema(None)
